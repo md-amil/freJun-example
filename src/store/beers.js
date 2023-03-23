@@ -1,7 +1,27 @@
+import axios from '../api';
+
 //action type
 const SET_BEERS = 'SET_BEERS';
 const ADD_BEERS = 'ADD_BEERS';
 const RESET_BEERS = 'RESET_BEERS';
+const LOADING_STATUS = 'LOADING_STATUS';
+
+export const fetchBeers = page => async dispatch => {
+  const {data} = await axios
+    .get('beers', {
+      params: {page},
+    })
+    .catch(err => {
+      console.log(err);
+    });
+  dispatch(addBeers(data));
+  dispatch(loadingStatus(false));
+};
+
+export const loadingStatus = status => ({
+  type: LOADING_STATUS,
+  payload: status,
+});
 
 //action creator
 export const setBeers = beers => ({
@@ -18,15 +38,21 @@ export const resetBeers = () => ({
   payload: [],
 });
 
-export default function beerReducer(state = [], action) {
+export default function beerReducer(
+  state = {loading: false, data: []},
+  action,
+) {
   if (action.type === SET_BEERS) {
-    return action.payload;
+    return {...state, data: action.payload};
   }
   if (action.type === RESET_BEERS) {
-    return action.payload;
+    return {...state, data: action.payload};
   }
   if (action.type === ADD_BEERS) {
-    return [...state, ...action.payload];
+    return {...state, data: [...state.data, ...action.payload]};
+  }
+  if (action.type === LOADING_STATUS) {
+    return {...state, loading: action.payload};
   }
   return state;
 }

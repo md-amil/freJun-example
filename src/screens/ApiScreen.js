@@ -1,4 +1,3 @@
-import axios from '../api';
 import React, {useEffect, useState} from 'react';
 import {
   ActivityIndicator,
@@ -8,15 +7,17 @@ import {
   View,
 } from 'react-native';
 import {useDispatch, useSelector} from 'react-redux';
-import {addBeers, resetBeers} from '../store/beers';
+import {fetchBeers, loadingStatus, resetBeers} from '../store/beers';
 import {useIsFocused} from '@react-navigation/native';
 
 const _renderItem = ({item}) => {
   return (
-    <View style={styles.userContainer}>
-      <Text>{item.name}</Text>
-      <Text>{item.id}</Text>
-    </View>
+    <>
+      <View style={styles.userContainer}>
+        <Text style={styles.title}>{item.name}</Text>
+        <Text numberOfLines={1}>{item.description}</Text>
+      </View>
+    </>
   );
 };
 
@@ -27,42 +28,29 @@ const _renderFooter = () => (
 );
 
 export default function ApiScreen({navigation}) {
-  const [refreshing, setRefreshing] = useState(false);
   const [page, setPage] = useState(1);
   const isFocused = useIsFocused();
-
-  const beers = useSelector(state => state.beers);
+  const {loading, data: beers} = useSelector(state => state.beers);
   const dispatch = useDispatch();
 
   useEffect(() => {
     if (isFocused) {
       dispatch(resetBeers());
       setPage(1);
+      dispatch(loadingStatus(true));
     }
   }, [isFocused, dispatch]);
 
   useEffect(() => {
-    const fetchBeer = async page => {
-      console.log(page);
-      const {data} = await axios
-        .get('beers', {
-          params: {page},
-        })
-        .catch(err => {
-          console.log(err);
-        });
-      setRefreshing(false);
-      dispatch(addBeers(data));
-    };
-    fetchBeer(page);
+    dispatch(fetchBeers(page));
   }, [page, dispatch]);
 
   return (
     <View style={{flex: 1}}>
       <FlatList
-        refreshing={refreshing}
+        refreshing={loading}
         onRefresh={() => {
-          setRefreshing(true);
+          dispatch(loadingStatus(true));
           dispatch(resetBeers());
           setPage(1);
         }}
@@ -86,7 +74,7 @@ const styles = StyleSheet.create({
     marginVertical: 2,
     elevation: 3,
     backgroundColor: 'white',
-    flexDirection: 'row',
     justifyContent: 'space-between',
   },
+  title: {fontSize: 16, fontWeight: 'bold'},
 });
