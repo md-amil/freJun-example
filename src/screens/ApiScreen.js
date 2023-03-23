@@ -7,7 +7,7 @@ import {
   View,
 } from 'react-native';
 import {useDispatch, useSelector} from 'react-redux';
-import {fetchBeers, loadingStatus, resetBeers} from '../store/beers';
+import {fetchBeers, loadingStatus} from '../store/beers';
 import {useIsFocused} from '@react-navigation/native';
 
 const _renderItem = ({item}) => {
@@ -15,6 +15,7 @@ const _renderItem = ({item}) => {
     <>
       <View style={styles.userContainer}>
         <Text style={styles.title}>{item.name}</Text>
+        <Text>{item.id}</Text>
         <Text numberOfLines={1}>{item.description}</Text>
       </View>
     </>
@@ -35,7 +36,6 @@ export default function ApiScreen({navigation}) {
 
   useEffect(() => {
     if (isFocused) {
-      dispatch(resetBeers());
       setPage(1);
       dispatch(loadingStatus(true));
     }
@@ -51,7 +51,6 @@ export default function ApiScreen({navigation}) {
         refreshing={loading}
         onRefresh={() => {
           dispatch(loadingStatus(true));
-          dispatch(resetBeers());
           setPage(1);
         }}
         keyExtractor={item => item.id}

@@ -14,16 +14,20 @@ export const fetchBeers = page => async dispatch => {
     .catch(err => {
       console.log(err);
     });
-  dispatch(addBeers(data));
+  if (page === 1) {
+    dispatch(setBeers(data));
+  } else {
+    dispatch(addBeers(data));
+  }
   dispatch(loadingStatus(false));
 };
 
+//action creator
 export const loadingStatus = status => ({
   type: LOADING_STATUS,
   payload: status,
 });
 
-//action creator
 export const setBeers = beers => ({
   type: SET_BEERS,
   payload: beers,
